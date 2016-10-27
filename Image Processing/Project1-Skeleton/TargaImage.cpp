@@ -798,9 +798,9 @@ bool TargaImage::Dither_FS()
 
 		for(int j = 0; j < width * height * 4; j = j + 4)
 		{
-			data[j] = (unsigned char)floor(ar[j] * 255);
-			data[j + 1] = (unsigned char)floor(ar[j] * 255);
-			data[j + 2] = (unsigned char)floor(ar[j] * 255);
+			data[j] = (unsigned char)floor(ar[j] * 255.0);
+			data[j + 1] = (unsigned char)floor(ar[j] * 255.0);
+			data[j + 2] = (unsigned char)floor(ar[j] * 255.0);
 		}
 		delete[] ar;
 		ar = NULL;
@@ -904,8 +904,28 @@ bool TargaImage::Comp_Over(TargaImage* pImage)
         return false;
     }
 
-    ClearToBlack();
-    return false;
+	double am = 0;
+
+	try
+	{
+		for(int i = 0; i < width * height * 4; i = i + 4)
+		{	
+			am = 1 - (data[i + 3] / 255.0);
+
+			for(int j = i; j < i + 3; j = j + 1)
+			{
+				data[j] = (data[j]) + (am * (pImage ->data[j]));
+			}
+				data[i + 3] = ((data[i + 3] / 255.0) + (am * (pImage -> data[i + 3] / 255.0))) * 255.0;
+		}
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
+
 }// Comp_Over
 
 
@@ -923,8 +943,27 @@ bool TargaImage::Comp_In(TargaImage* pImage)
         return false;
     }
 
-    ClearToBlack();
-    return false;
+	double am = 0;
+
+	try
+	{
+		for(int i = 0; i < width * height * 4; i = i + 4)
+		{	
+			am = pImage->data[i + 3] / 255.0;
+
+			for(int j = i; j < i + 3; j = j + 1)
+			{
+				data[j] = data[j] * am;
+			}
+				data[i + 3] = ((data[i + 3] / 255.0) * am) * 255.0;
+		}
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
 }// Comp_In
 
 
@@ -942,8 +981,27 @@ bool TargaImage::Comp_Out(TargaImage* pImage)
         return false;
     }
 
-    ClearToBlack();
-    return false;
+	double am = 0;
+
+	try
+	{
+		for(int i = 0; i < width * height * 4; i = i + 4)
+		{	
+			am = 1 - (pImage->data[i + 3] / 255.0);
+
+			for(int j = i; j < i + 3; j = j + 1)
+			{
+				data[j] = data[j] * am;
+			}
+				data[i + 3] = ((data[i + 3] / 255.0) * am) * 255.0;
+		}
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
 }// Comp_Out
 
 
@@ -961,8 +1019,29 @@ bool TargaImage::Comp_Atop(TargaImage* pImage)
         return false;
     }
 
-    ClearToBlack();
-    return false;
+	double amf = 0;
+	double amg = 0;
+
+	try
+	{
+		for(int i = 0; i < width * height * 4; i = i + 4)
+		{	
+			amf = pImage->data[i + 3] / 255.0;
+			amg = 1 - (data[i + 3] / 255.0);
+
+			for(int j = i; j < i + 3; j = j + 1)
+			{
+				data[j] = (data[j] * amf) + (amg * (pImage ->data[j]));
+			}
+				data[i + 3] = (((data[i + 3] / 255.0) * amf) + (amg * (pImage -> data[i + 3] / 255.0))) * 255.0;
+		}
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
 }// Comp_Atop
 
 
@@ -980,8 +1059,29 @@ bool TargaImage::Comp_Xor(TargaImage* pImage)
         return false;
     }
 
-    ClearToBlack();
-    return false;
+	double amf = 0;
+	double amg = 0;
+
+	try
+	{
+		for(int i = 0; i < width * height * 4; i = i + 4)
+		{	
+			amf = 1 - (pImage->data[i + 3] / 255.0);
+			amg = 1 - (data[i + 3] / 255.0);
+
+			for(int j = i; j < i + 3; j = j + 1)
+			{
+				data[j] = (data[j] * amf) + (amg * (pImage ->data[j]));
+			}
+				data[i + 3] = (((data[i + 3] / 255.0) * amf) + (amg * (pImage -> data[i + 3] / 255.0))) * 255.0;
+		}
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
 }// Comp_Xor
 
 
